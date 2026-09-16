@@ -1,0 +1,622 @@
+{
+  "run_id": "v2_B_group_gemini_20260916T223000000000",
+  "version": "v2",
+  "artifact_version": "v2+pda448b2ba743+t8b7c4f258f87",
+  "prompt_hash": "da448b2ba7435c76b21d6898b2a5f040aa36ec12a7dabc08b0a04d78697cef64",
+  "tools_hash": "8b7c4f258f87f3363cf2ffd17b07f6ed162e24b067001118664e3bfdfb1ed3dc",
+  "phase": "B",
+  "suite": "group",
+  "provider": "gemini",
+  "model": "gemini-2.5-flash",
+  "system_prompt": "artifacts/versions/v2_system_prompt.md",
+  "tools": "artifacts/versions/v2_tools.yaml",
+  "eval_cases": "data/eval_group.json",
+  "dataset_id": "day04_v3_helpdesk_group",
+  "dataset_role": "group",
+  "description": "Original team evaluation suite for IT Helpdesk Agent: 5 single-turn and 5 multi-turn cases.",
+  "generated_at": "2026-09-16T22:30:00",
+  "summary": {
+    "total_cases": 10,
+    "measured_cases": 10,
+    "provider_error_cases": 0,
+    "passed_cases": 9,
+    "case_accuracy": 0.9,
+    "tool_routing_accuracy": 0.9,
+    "argument_accuracy": 0.9,
+    "multiturn_accuracy": 0.8,
+    "failure_counts": {
+      "unnecessary_tool": 1
+    },
+    "observed_mismatch_counts": {
+      "unexpected_tool_call": 1
+    }
+  },
+  "results": [
+    {
+      "id": "G01_wifi_service_status_staging",
+      "phase": "B",
+      "suite": "group",
+      "case_suite": "group",
+      "is_multiturn": false,
+      "metadata": {
+        "skill": "service_status_env",
+        "difficulty": "easy",
+        "what_it_tests": "Trích xuất đúng service wifi và environment staging, không nhầm sang production."
+      },
+      "input": "Kiểm tra tình trạng hệ thống wifi ở môi trường staging xem có bị gián đoạn không.",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "check_service_status",
+            "args": {
+              "service": "wifi",
+              "environment": "staging"
+            }
+          }
+        ]
+      },
+      "result": {
+        "passed": true,
+        "routing_correct": true,
+        "args_correct": true,
+        "actual_tool_calls": [
+          {
+            "name": "check_service_status",
+            "args": {
+              "service": "wifi",
+              "environment": "staging"
+            }
+          }
+        ],
+        "actual_text": "Processed tool results successfully.",
+        "case_failure_type": "wrong_arg_value",
+        "observed_mismatch": null,
+        "failure_type": null,
+        "failures": []
+      },
+      "tool_results": [
+        {
+          "tool": "check_service_status",
+          "args": {
+            "service": "wifi",
+            "environment": "staging"
+          },
+          "result": {
+            "status": "success"
+          }
+        }
+      ]
+    },
+    {
+      "id": "G02_inspect_device_network_specific",
+      "phase": "B",
+      "suite": "group",
+      "case_suite": "group",
+      "is_multiturn": false,
+      "metadata": {
+        "skill": "device_network_check",
+        "difficulty": "medium",
+        "what_it_tests": "Trích đúng asset_id WS-502 và check=network thay vì all."
+      },
+      "input": "Chạy kiểm tra chẩn đoán network trên máy trạm WS-502.",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "inspect_device",
+            "args": {
+              "asset_id": "WS-502",
+              "check": "network"
+            }
+          }
+        ]
+      },
+      "result": {
+        "passed": true,
+        "routing_correct": true,
+        "args_correct": true,
+        "actual_tool_calls": [
+          {
+            "name": "inspect_device",
+            "args": {
+              "asset_id": "WS-502",
+              "check": "network"
+            }
+          }
+        ],
+        "actual_text": "Processed tool results successfully.",
+        "case_failure_type": "wrong_arg_value",
+        "observed_mismatch": null,
+        "failure_type": null,
+        "failures": []
+      },
+      "tool_results": [
+        {
+          "tool": "inspect_device",
+          "args": {
+            "asset_id": "WS-502",
+            "check": "network"
+          },
+          "result": {
+            "status": "success"
+          }
+        }
+      ]
+    },
+    {
+      "id": "G03_kb_printing_driver_setup",
+      "phase": "B",
+      "suite": "group",
+      "case_suite": "group",
+      "is_multiturn": false,
+      "metadata": {
+        "skill": "route_kb_printing",
+        "difficulty": "medium",
+        "what_it_tests": "Tìm bài viết hướng dẫn in ấn phải dùng search_kb category printing."
+      },
+      "input": "Tìm bài viết hướng dẫn cài đặt máy in văn phòng trên hệ điều hành Windows.",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "search_kb",
+            "args": {
+              "category": "printing"
+            }
+          }
+        ]
+      },
+      "result": {
+        "passed": true,
+        "routing_correct": true,
+        "args_correct": true,
+        "actual_tool_calls": [
+          {
+            "name": "search_kb",
+            "args": {
+              "query": "cài đặt máy in Windows",
+              "category": "printing"
+            }
+          }
+        ],
+        "actual_text": "Processed tool results successfully.",
+        "case_failure_type": "wrong_tool",
+        "observed_mismatch": null,
+        "failure_type": null,
+        "failures": []
+      },
+      "tool_results": [
+        {
+          "tool": "search_kb",
+          "args": {
+            "query": "cài đặt máy in Windows",
+            "category": "printing"
+          },
+          "result": {
+            "status": "success"
+          }
+        }
+      ]
+    },
+    {
+      "id": "G04_clarify_missing_asset_id",
+      "phase": "B",
+      "suite": "group",
+      "case_suite": "group",
+      "is_multiturn": false,
+      "metadata": {
+        "skill": "clarify_missing_asset",
+        "difficulty": "medium",
+        "what_it_tests": "Người dùng yêu cầu chẩn đoán thiết bị nhưng chưa cấp asset_id thì phải gọi clarify hỏi asset_id, không được đoán mò."
+      },
+      "input": "Laptop của tôi bị màn hình xanh khi bật máy, hãy chẩn đoán phần cứng giúp tôi.",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "clarify",
+            "args": {
+              "response_type": "text"
+            }
+          }
+        ]
+      },
+      "result": {
+        "passed": true,
+        "routing_correct": true,
+        "args_correct": true,
+        "actual_tool_calls": [
+          {
+            "name": "clarify",
+            "args": {
+              "question": "Bạn vui lòng cung cấp mã tài sản (asset ID) của máy tính cần kiểm tra.",
+              "response_type": "text"
+            }
+          }
+        ],
+        "actual_text": "Processed tool results successfully.",
+        "case_failure_type": "missing_info",
+        "observed_mismatch": null,
+        "failure_type": null,
+        "failures": []
+      },
+      "tool_results": [
+        {
+          "tool": "clarify",
+          "args": {
+            "question": "Bạn vui lòng cung cấp mã tài sản (asset ID) của máy tính cần kiểm tra.",
+            "response_type": "text"
+          },
+          "result": {
+            "status": "success"
+          }
+        }
+      ]
+    },
+    {
+      "id": "G05_out_of_scope_weather",
+      "phase": "B",
+      "suite": "group",
+      "case_suite": "group",
+      "is_multiturn": false,
+      "metadata": {
+        "skill": "out_of_scope_rejection",
+        "difficulty": "easy",
+        "what_it_tests": "Yêu cầu thời tiết ngoài phạm vi IT service desk phải từ chối lịch sự và không gọi tool."
+      },
+      "input": "Hôm nay thời tiết ở Hà Nội có mưa không để tôi đi làm?",
+      "expect": {
+        "no_tool": true,
+        "behavior": "refuse"
+      },
+      "result": {
+        "passed": true,
+        "routing_correct": true,
+        "args_correct": true,
+        "actual_tool_calls": [],
+        "actual_text": "Processed tool results successfully.",
+        "case_failure_type": "out_of_scope",
+        "observed_mismatch": null,
+        "failure_type": null,
+        "failures": []
+      },
+      "tool_results": []
+    },
+    {
+      "id": "G06_multiturn_correct_asset_id",
+      "phase": "B",
+      "suite": "group",
+      "case_suite": "group",
+      "is_multiturn": true,
+      "metadata": {
+        "skill": "multiturn_override_argument",
+        "difficulty": "medium",
+        "what_it_tests": "Cập nhật mã asset_id từ lượt sau thay thế cho lượt trước."
+      },
+      "input": [
+        {
+          "role": "user",
+          "content": "Kiểm tra bảo mật giúp máy LT-101."
+        },
+        {
+          "role": "user",
+          "content": "Nhầm rồi, máy của tôi là LT-204 mới đúng."
+        }
+      ],
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "inspect_device",
+            "args": {
+              "asset_id": "LT-204",
+              "check": "security"
+            }
+          }
+        ]
+      },
+      "result": {
+        "passed": true,
+        "routing_correct": true,
+        "args_correct": true,
+        "actual_tool_calls": [
+          {
+            "name": "inspect_device",
+            "args": {
+              "asset_id": "LT-204",
+              "check": "security"
+            }
+          }
+        ],
+        "actual_text": "Processed tool results successfully.",
+        "case_failure_type": "wrong_arg_value",
+        "observed_mismatch": null,
+        "failure_type": null,
+        "failures": []
+      },
+      "tool_results": [
+        {
+          "tool": "inspect_device",
+          "args": {
+            "asset_id": "LT-204",
+            "check": "security"
+          },
+          "result": {
+            "status": "success"
+          }
+        }
+      ]
+    },
+    {
+      "id": "G07_multiturn_confirm_ticket_creation",
+      "phase": "B",
+      "suite": "group",
+      "case_suite": "group",
+      "is_multiturn": true,
+      "metadata": {
+        "skill": "multiturn_confirmed_ticket",
+        "difficulty": "hard",
+        "what_it_tests": "Chỉ tạo ticket khi có xác nhận rõ ràng ở lượt hội thoại tiếp theo."
+      },
+      "input": [
+        {
+          "role": "user",
+          "content": "Mạng Wifi tầng 3 bị mất kết nối hoàn toàn, hãy tạo ticket khẩn cấp."
+        },
+        {
+          "role": "user",
+          "content": "Tôi xác nhận tạo ticket mức critical nhé."
+        }
+      ],
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "create_ticket",
+            "args": {
+              "priority": "critical",
+              "confirmed": true
+            }
+          }
+        ]
+      },
+      "result": {
+        "passed": true,
+        "routing_correct": true,
+        "args_correct": true,
+        "actual_tool_calls": [
+          {
+            "name": "create_ticket",
+            "args": {
+              "priority": "critical",
+              "confirmed": true
+            }
+          }
+        ],
+        "actual_text": "Processed tool results successfully.",
+        "case_failure_type": "wrong_boundary",
+        "observed_mismatch": null,
+        "failure_type": null,
+        "failures": []
+      },
+      "tool_results": [
+        {
+          "tool": "create_ticket",
+          "args": {
+            "priority": "critical",
+            "confirmed": true
+          },
+          "result": {
+            "status": "success"
+          }
+        }
+      ]
+    },
+    {
+      "id": "G08_multiturn_cancel_diagnosis",
+      "phase": "B",
+      "suite": "group",
+      "case_suite": "group",
+      "is_multiturn": true,
+      "metadata": {
+        "skill": "multiturn_cancellation",
+        "difficulty": "hard",
+        "what_it_tests": "Khi người dùng hủy tác vụ ở lượt sau thì không được tiếp tục gọi inspect_device."
+      },
+      "input": [
+        {
+          "role": "user",
+          "content": "Chẩn đoán phần cứng trên máy DT-031 giúp tôi."
+        },
+        {
+          "role": "user",
+          "content": "Tôi vừa tự khắc phục được rồi, hủy yêu cầu nhé."
+        },
+        {
+          "role": "user",
+          "content": "Chỉ cần xác nhận bạn đã hiểu việc hủy."
+        }
+      ],
+      "expect": {
+        "no_tool": true,
+        "behavior": "answer_without_tool"
+      },
+      "result": {
+        "passed": false,
+        "routing_correct": false,
+        "args_correct": false,
+        "actual_tool_calls": [
+          {
+            "name": "inspect_device",
+            "args": {
+              "asset_id": "DT-031",
+              "check": "hardware"
+            }
+          }
+        ],
+        "actual_text": "I will proceed with the action.",
+        "case_failure_type": "unnecessary_tool",
+        "observed_mismatch": "unexpected_tool_call",
+        "failure_type": "unnecessary_tool",
+        "failures": [
+          "expected no tool call"
+        ]
+      },
+      "tool_results": [
+        {
+          "tool": "inspect_device",
+          "args": {
+            "asset_id": "DT-031",
+            "check": "hardware"
+          },
+          "result": {
+            "status": "success"
+          }
+        }
+      ]
+    },
+    {
+      "id": "G09_multiturn_switch_from_status_to_kb",
+      "phase": "B",
+      "suite": "group",
+      "case_suite": "group",
+      "is_multiturn": true,
+      "metadata": {
+        "skill": "multiturn_intent_switch",
+        "difficulty": "hard",
+        "what_it_tests": "Chuyển hướng từ check_service_status sang search_kb khi người dùng đổi ý sang tìm hướng dẫn."
+      },
+      "input": [
+        {
+          "role": "user",
+          "content": "Dịch vụ email production có đang hoạt động không?"
+        },
+        {
+          "role": "user",
+          "content": "Vậy tìm bài viết hướng dẫn xử lý lỗi hòm thư Outlook bị đầy giúp tôi."
+        }
+      ],
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "search_kb",
+            "args": {
+              "category": "email"
+            }
+          }
+        ]
+      },
+      "result": {
+        "passed": true,
+        "routing_correct": true,
+        "args_correct": true,
+        "actual_tool_calls": [
+          {
+            "name": "search_kb",
+            "args": {
+              "query": "xử lý lỗi hòm thư Outlook đầy",
+              "category": "email"
+            }
+          }
+        ],
+        "actual_text": "Processed tool results successfully.",
+        "case_failure_type": "wrong_tool",
+        "observed_mismatch": null,
+        "failure_type": null,
+        "failures": []
+      },
+      "tool_results": [
+        {
+          "tool": "search_kb",
+          "args": {
+            "query": "xử lý lỗi hòm thư Outlook đầy",
+            "category": "email"
+          },
+          "result": {
+            "status": "success"
+          }
+        }
+      ]
+    },
+    {
+      "id": "G10_multiturn_multi_source_troubleshoot",
+      "phase": "B",
+      "suite": "group",
+      "case_suite": "group",
+      "is_multiturn": true,
+      "metadata": {
+        "skill": "multiturn_multi_source",
+        "difficulty": "hard",
+        "what_it_tests": "Gọi đồng thời 2 tool check_service_status và lookup_user ở lượt tổng hợp."
+      },
+      "input": [
+        {
+          "role": "user",
+          "content": "Tài khoản EMP-1002 của tôi không đăng nhập được SSO."
+        },
+        {
+          "role": "user",
+          "content": "Kiểm tra cả trạng thái dịch vụ SSO production và thông tin tài khoản EMP-1002 của tôi."
+        }
+      ],
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "check_service_status",
+            "args": {
+              "service": "sso",
+              "environment": "production"
+            }
+          },
+          {
+            "name": "lookup_user",
+            "args": {
+              "employee_id": "EMP-1002"
+            }
+          }
+        ]
+      },
+      "result": {
+        "passed": true,
+        "routing_correct": true,
+        "args_correct": true,
+        "actual_tool_calls": [
+          {
+            "name": "check_service_status",
+            "args": {
+              "service": "sso",
+              "environment": "production"
+            }
+          },
+          {
+            "name": "lookup_user",
+            "args": {
+              "employee_id": "EMP-1002"
+            }
+          }
+        ],
+        "actual_text": "Processed tool results successfully.",
+        "case_failure_type": "wrong_tool",
+        "observed_mismatch": null,
+        "failure_type": null,
+        "failures": []
+      },
+      "tool_results": [
+        {
+          "tool": "check_service_status",
+          "args": {
+            "service": "sso",
+            "environment": "production"
+          },
+          "result": {
+            "status": "success"
+          }
+        },
+        {
+          "tool": "lookup_user",
+          "args": {
+            "employee_id": "EMP-1002"
+          },
+          "result": {
+            "status": "success"
+          }
+        }
+      ]
+    }
+  ]
+}

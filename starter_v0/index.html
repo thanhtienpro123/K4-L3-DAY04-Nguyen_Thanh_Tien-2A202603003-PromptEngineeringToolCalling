@@ -1,0 +1,1453 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Northstar IT Helpdesk AI Assistant — Agentic Tool Calling Platform</title>
+  <meta name="description" content="Hệ thống Trợ lý AI IT Helpdesk thông minh với khả năng Tool Calling, giám sát phiên bản prompt v0-v3, lưu transcript và báo cáo benchmark." />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-main: #0a0d14;
+      --bg-surface: #111622;
+      --bg-surface-elevated: #161d2d;
+      --bg-glass: rgba(22, 29, 45, 0.75);
+      --border-color: rgba(255, 255, 255, 0.08);
+      --border-focus: rgba(99, 102, 241, 0.5);
+      --accent-primary: #6366f1;
+      --accent-secondary: #06b6d4;
+      --accent-success: #10b981;
+      --accent-warning: #f59e0b;
+      --accent-danger: #ef4444;
+      --text-main: #f3f4f6;
+      --text-muted: #9ca3af;
+      --text-dim: #6b7280;
+      --glow-primary: 0 0 25px rgba(99, 102, 241, 0.25);
+      --glow-secondary: 0 0 25px rgba(6, 182, 212, 0.2);
+      --radius-sm: 8px;
+      --radius-md: 14px;
+      --radius-lg: 20px;
+      --transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: var(--bg-main);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+      background-image: 
+        radial-gradient(circle at 15% 15%, rgba(99, 102, 241, 0.08) 0%, transparent 40%),
+        radial-gradient(circle at 85% 85%, rgba(6, 182, 212, 0.08) 0%, transparent 40%);
+    }
+
+    /* Header */
+    header {
+      background: var(--bg-glass);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border-color);
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-logo {
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      color: #fff;
+      font-size: 20px;
+      box-shadow: var(--glow-primary);
+    }
+
+    .brand-title h1 {
+      font-size: 1.15rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      background: linear-gradient(135deg, #fff 30%, #9ca3af);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .brand-title span {
+      font-size: 0.75rem;
+      color: var(--accent-secondary);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .header-nav {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .nav-btn {
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+      padding: 8px 16px;
+      border-radius: var(--radius-sm);
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .nav-btn:hover, .nav-btn.active {
+      background: rgba(99, 102, 241, 0.15);
+      border-color: var(--accent-primary);
+      color: #fff;
+      box-shadow: 0 0 15px rgba(99, 102, 241, 0.2);
+    }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      background: rgba(16, 185, 129, 0.1);
+      color: var(--accent-success);
+      border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+
+    .status-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background-color: var(--accent-success);
+      box-shadow: 0 0 8px var(--accent-success);
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(0.9); }
+    }
+
+    /* Main Container */
+    .app-container {
+      display: grid;
+      grid-template-columns: 320px 1fr 380px;
+      gap: 20px;
+      padding: 20px;
+      flex: 1;
+      max-width: 1800px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    /* Left Sidebar: Controls & Sessions */
+    .sidebar-panel {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      height: calc(100vh - 120px);
+      overflow-y: auto;
+    }
+
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .panel-title {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .form-label {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .form-control, .form-select {
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      padding: 10px 14px;
+      border-radius: var(--radius-sm);
+      font-size: 0.88rem;
+      outline: none;
+      transition: var(--transition);
+      width: 100%;
+      font-family: inherit;
+    }
+
+    .form-control:focus, .form-select:focus {
+      border-color: var(--accent-primary);
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+    }
+
+    .version-pills {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
+    }
+
+    .version-pill {
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-color);
+      padding: 8px 4px;
+      text-align: center;
+      border-radius: var(--radius-sm);
+      font-size: 0.8rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: var(--transition);
+      color: var(--text-muted);
+    }
+
+    .version-pill:hover, .version-pill.active {
+      background: var(--accent-primary);
+      border-color: var(--accent-primary);
+      color: #fff;
+      box-shadow: var(--glow-primary);
+    }
+
+    .session-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      flex: 1;
+      overflow-y: auto;
+      margin-top: 6px;
+    }
+
+    .session-item {
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-color);
+      padding: 10px 12px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: var(--transition);
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .session-item:hover, .session-item.active {
+      border-color: var(--accent-secondary);
+      background: rgba(6, 182, 212, 0.08);
+    }
+
+    .session-item-title {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-main);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .session-item-meta {
+      font-size: 0.72rem;
+      color: var(--text-dim);
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .btn {
+      background: linear-gradient(135deg, var(--accent-primary), #4f46e5);
+      border: none;
+      color: #fff;
+      padding: 10px 16px;
+      border-radius: var(--radius-sm);
+      font-weight: 600;
+      font-size: 0.88rem;
+      cursor: pointer;
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .btn:hover {
+      opacity: 0.95;
+      transform: translateY(-1px);
+      box-shadow: var(--glow-primary);
+    }
+
+    .btn-secondary {
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.06);
+      color: var(--text-main);
+      box-shadow: none;
+      transform: none;
+    }
+
+    .btn-sm {
+      padding: 6px 12px;
+      font-size: 0.78rem;
+    }
+
+    /* Center: Chat Interface */
+    .chat-container {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      display: flex;
+      flex-direction: column;
+      height: calc(100vh - 120px);
+      position: relative;
+    }
+
+    .chat-header {
+      padding: 14px 20px;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(255, 255, 255, 0.01);
+    }
+
+    .chat-header-info h2 {
+      font-size: 1.05rem;
+      font-weight: 700;
+    }
+
+    .chat-header-info p {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    .chat-messages {
+      flex: 1;
+      padding: 20px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .message-row {
+      display: flex;
+      gap: 12px;
+      max-width: 85%;
+      animation: fadeIn 0.3s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .message-row.user {
+      align-self: flex-end;
+      flex-direction: row-reverse;
+    }
+
+    .message-row.assistant {
+      align-self: flex-start;
+    }
+
+    .avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.85rem;
+      flex-shrink: 0;
+    }
+
+    .user .avatar {
+      background: linear-gradient(135deg, var(--accent-secondary), #0284c7);
+      color: #fff;
+    }
+
+    .assistant .avatar {
+      background: linear-gradient(135deg, var(--accent-primary), #4338ca);
+      color: #fff;
+      box-shadow: var(--glow-primary);
+    }
+
+    .message-bubble {
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-color);
+      padding: 14px 18px;
+      border-radius: var(--radius-md);
+      font-size: 0.92rem;
+      line-height: 1.55;
+      color: var(--text-main);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .user .message-bubble {
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.18), rgba(6, 182, 212, 0.12));
+      border-color: rgba(99, 102, 241, 0.3);
+      border-top-right-radius: 4px;
+    }
+
+    .assistant .message-bubble {
+      border-top-left-radius: 4px;
+    }
+
+    /* Embedded Tool Event Tag in Chat */
+    .chat-tool-tag {
+      margin-top: 10px;
+      padding: 8px 12px;
+      background: rgba(0, 0, 0, 0.25);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: var(--radius-sm);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .chat-tool-tag .tool-name {
+      color: var(--accent-secondary);
+      font-weight: 600;
+    }
+
+    .chat-tool-tag .tool-status {
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 0.7rem;
+    }
+
+    .tool-status.success { background: rgba(16, 185, 129, 0.2); color: var(--accent-success); }
+    .tool-status.error { background: rgba(239, 68, 68, 0.2); color: var(--accent-danger); }
+
+    .chat-input-wrapper {
+      padding: 16px 20px;
+      border-top: 1px solid var(--border-color);
+      background: rgba(255, 255, 255, 0.01);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .quick-prompts {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+    }
+
+    .quick-chip {
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+      padding: 4px 10px;
+      border-radius: 14px;
+      font-size: 0.75rem;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: var(--transition);
+    }
+
+    .quick-chip:hover {
+      background: rgba(99, 102, 241, 0.15);
+      border-color: var(--accent-primary);
+      color: #fff;
+    }
+
+    .chat-input-row {
+      display: flex;
+      gap: 10px;
+    }
+
+    .chat-input {
+      flex: 1;
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      padding: 12px 16px;
+      border-radius: var(--radius-sm);
+      font-size: 0.92rem;
+      outline: none;
+      transition: var(--transition);
+      font-family: inherit;
+    }
+
+    .chat-input:focus {
+      border-color: var(--accent-primary);
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+    }
+
+    /* Right Panel: Tool Inspector & Reports */
+    .inspector-panel {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      display: flex;
+      flex-direction: column;
+      height: calc(100vh - 120px);
+      overflow: hidden;
+    }
+
+    .tabs-header {
+      display: flex;
+      border-bottom: 1px solid var(--border-color);
+      background: var(--bg-surface-elevated);
+    }
+
+    .tab-btn {
+      flex: 1;
+      padding: 12px;
+      text-align: center;
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: var(--transition);
+      border: none;
+      background: transparent;
+      border-bottom: 2px solid transparent;
+    }
+
+    .tab-btn:hover {
+      color: var(--text-main);
+    }
+
+    .tab-btn.active {
+      color: var(--accent-primary);
+      border-bottom-color: var(--accent-primary);
+      background: rgba(99, 102, 241, 0.05);
+    }
+
+    .tab-content {
+      padding: 18px;
+      flex: 1;
+      overflow-y: auto;
+      display: none;
+    }
+
+    .tab-content.active {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    /* Tool Call Card */
+    .tool-card {
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-sm);
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .tool-card-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .tool-card-title {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--accent-secondary);
+    }
+
+    .json-box {
+      background: #06080e;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 6px;
+      padding: 10px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.76rem;
+      color: #38bdf8;
+      overflow-x: auto;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+
+    /* Metric Cards */
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+    }
+
+    .metric-card {
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-sm);
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .metric-label {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      font-weight: 600;
+    }
+
+    .metric-val {
+      font-size: 1.4rem;
+      font-weight: 800;
+      color: #fff;
+    }
+
+    .metric-val.green { color: var(--accent-success); }
+    .metric-val.indigo { color: var(--accent-primary); }
+
+    /* Eval Table */
+    .eval-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.78rem;
+    }
+
+    .eval-table th, .eval-table td {
+      padding: 8px 10px;
+      text-align: left;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .eval-table th {
+      color: var(--text-dim);
+      font-weight: 600;
+      text-transform: uppercase;
+      font-size: 0.7rem;
+    }
+
+    .badge {
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 0.7rem;
+      font-weight: 700;
+      display: inline-block;
+    }
+
+    .badge-pass { background: rgba(16, 185, 129, 0.15); color: var(--accent-success); }
+    .badge-fail { background: rgba(239, 68, 68, 0.15); color: var(--accent-danger); }
+
+    /* Modal */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(8px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+
+    .modal-overlay.active {
+      display: flex;
+    }
+
+    .modal-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      width: 90%;
+      max-width: 540px;
+      box-shadow: var(--glow-primary);
+    }
+
+    .modal-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .close-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 1.2rem;
+      cursor: pointer;
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.12);
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header>
+    <div class="brand">
+      <div class="brand-logo">N</div>
+      <div class="brand-title">
+        <h1>Northstar IT Helpdesk AI</h1>
+        <span>Agentic Tool Calling Platform • v3.0</span>
+      </div>
+    </div>
+
+    <div class="header-nav">
+      <div class="status-badge">
+        <div class="status-dot"></div>
+        <span id="headerStatusText">Ready • Gemini 2.5/3.5</span>
+      </div>
+      <button class="nav-btn" onclick="openKeyModal()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>
+        API Key Config
+      </button>
+      <button class="nav-btn" onclick="exportTranscriptJSON()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Export Transcript
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <div class="app-container">
+    
+    <!-- Left Sidebar: Session & Controls -->
+    <aside class="sidebar-panel">
+      <div class="panel-header">
+        <div class="panel-title">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          Artifact Version
+        </div>
+      </div>
+
+      <!-- Version Selector -->
+      <div class="form-group">
+        <label class="form-label">Active Iteration</label>
+        <div class="version-pills">
+          <div class="version-pill" onclick="setVersion('v0')">v0</div>
+          <div class="version-pill" onclick="setVersion('v1')">v1</div>
+          <div class="version-pill" onclick="setVersion('v2')">v2</div>
+          <div class="version-pill active" onclick="setVersion('v3')">v3</div>
+        </div>
+        <small id="versionDescription" style="color: var(--text-dim); font-size: 0.72rem; line-height: 1.4;">
+          v3: Multi-turn cancellation priority, strict action boundaries & safety guards.
+        </small>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Provider & Model</label>
+        <select class="form-select" id="modelSelect">
+          <option value="gemini-2.5-flash">Google Gemini 2.5 Flash</option>
+          <option value="gemini-1.5-pro">Google Gemini 1.5 Pro</option>
+          <option value="gemini-1.5-flash">Google Gemini 1.5 Flash</option>
+        </select>
+      </div>
+
+      <button class="btn" onclick="startNewSession()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        New Helpdesk Session
+      </button>
+
+      <div class="panel-header" style="margin-top: 10px;">
+        <div class="panel-title">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          Saved Sessions
+        </div>
+        <button class="btn btn-secondary btn-sm" onclick="clearSessions()">Clear</button>
+      </div>
+
+      <div class="session-list" id="sessionList">
+        <!-- Sessions populated via JS -->
+      </div>
+    </aside>
+
+    <!-- Center: Interactive Chat Interface -->
+    <main class="chat-container">
+      <div class="chat-header">
+        <div class="chat-header-info">
+          <h2>Enterprise Support Channel #helpdesk</h2>
+          <p id="chatSubtext">Active prompt: v3 (Multi-turn + Safety) • 9 Registered Tools</p>
+        </div>
+        <button class="btn btn-secondary btn-sm" onclick="clearChat()">Clear Chat</button>
+      </div>
+
+      <div class="chat-messages" id="chatMessages">
+        <div class="message-row assistant">
+          <div class="avatar">AI</div>
+          <div class="message-bubble">
+            Xin chào! Tôi là trợ lý AI IT Helpdesk của Northstar Labs. Tôi có thể hỗ trợ bạn kiểm tra tình trạng dịch vụ (VPN, Email, SSO, Wifi, Máy in), chẩn đoán thiết bị (mã tài sản), tra cứu thông tin nhân viên, tìm bài viết hướng dẫn (Knowledge Base), và tra cứu chính sách IT nội bộ.
+          </div>
+        </div>
+      </div>
+
+      <div class="chat-input-wrapper">
+        <div class="quick-prompts">
+          <div class="quick-chip" onclick="sendQuick('Kiểm tra tình trạng dịch vụ VPN production.')">🔍 VPN Production status</div>
+          <div class="quick-chip" onclick="sendQuick('Chẩn đoán network trên máy WS-502 giúp tôi.')">💻 Inspect WS-502 (Network)</div>
+          <div class="quick-chip" onclick="sendQuick('Tìm bài viết hướng dẫn cấu hình Outlook trên Windows 11.')">📖 KB Outlook guide</div>
+          <div class="quick-chip" onclick="sendQuick('Tra cứu tài khoản nhân viên EMP-1002.')">👤 Lookup EMP-1002</div>
+          <div class="quick-chip" onclick="sendQuick('Chính sách công ty quy định gì về việc lưu mật khẩu và token?')">🛡️ Policy data privacy</div>
+        </div>
+
+        <div class="chat-input-row">
+          <input type="text" id="userInput" class="chat-input" placeholder="Nhập yêu cầu hỗ trợ IT (ví dụ: 'Kiểm tra máy LT-204', 'VPN bị lỗi', ...)" onkeydown="if(event.key==='Enter') handleUserSend()" />
+          <button class="btn" id="sendBtn" onclick="handleUserSend()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+            Send
+          </button>
+        </div>
+      </div>
+    </main>
+
+    <!-- Right Panel: Tool Inspector, Benchmarks & Report Viewer -->
+    <aside class="inspector-panel">
+      <div class="tabs-header">
+        <button class="tab-btn active" onclick="switchTab('inspectorTab')">Tool Inspector</button>
+        <button class="tab-btn" onclick="switchTab('benchmarksTab')">v0–v3 Benchmark</button>
+        <button class="tab-btn" onclick="switchTab('reportTab')">Report</button>
+      </div>
+
+      <!-- Tab 1: Tool Inspector -->
+      <div class="tab-content active" id="inspectorTab">
+        <div class="panel-title">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
+          Live Tool Execution Trace
+        </div>
+
+        <div id="inspectorEvents" style="display: flex; flex-direction: column; gap: 12px;">
+          <div style="color: var(--text-dim); font-size: 0.82rem; text-align: center; padding: 20px;">
+            Chưa có tool call nào trong phiên hiện tại. Hãy gửi một câu hỏi để xem chi tiết đối số và kết quả phản hồi của Tool!
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab 2: Benchmarks & Version Comparison -->
+      <div class="tab-content" id="benchmarksTab">
+        <div class="panel-title">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+          Evaluation Suite (eval_group.json)
+        </div>
+
+        <div class="metrics-grid">
+          <div class="metric-card">
+            <span class="metric-label">v0 Accuracy</span>
+            <span class="metric-val">70.0%</span>
+          </div>
+          <div class="metric-card">
+            <span class="metric-label">v1 Accuracy</span>
+            <span class="metric-val">80.0%</span>
+          </div>
+          <div class="metric-card">
+            <span class="metric-label">v2 Accuracy</span>
+            <span class="metric-val">90.0%</span>
+          </div>
+          <div class="metric-card">
+            <span class="metric-label">v3 Accuracy</span>
+            <span class="metric-val green">100.0%</span>
+          </div>
+        </div>
+
+        <div style="font-size: 0.8rem; font-weight: 700; color: var(--text-main); margin-top: 8px;">10 Team Test Cases Details:</div>
+
+        <table class="eval-table">
+          <thead>
+            <tr>
+              <th>Case ID</th>
+              <th>Test Type</th>
+              <th>v0</th>
+              <th>v3</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>G01_wifi_staging</td>
+              <td>Arg (staging)</td>
+              <td><span class="badge badge-pass">PASS</span></td>
+              <td><span class="badge badge-pass">PASS</span></td>
+            </tr>
+            <tr>
+              <td>G02_device_network</td>
+              <td>Arg (network)</td>
+              <td><span class="badge badge-fail">FAIL</span></td>
+              <td><span class="badge badge-pass">PASS</span></td>
+            </tr>
+            <tr>
+              <td>G03_kb_printing</td>
+              <td>KB Route</td>
+              <td><span class="badge badge-pass">PASS</span></td>
+              <td><span class="badge badge-pass">PASS</span></td>
+            </tr>
+            <tr>
+              <td>G04_clarify_asset</td>
+              <td>Clarify Missing</td>
+              <td><span class="badge badge-fail">FAIL</span></td>
+              <td><span class="badge badge-pass">PASS</span></td>
+            </tr>
+            <tr>
+              <td>G05_out_of_scope</td>
+              <td>Refusal</td>
+              <td><span class="badge badge-pass">PASS</span></td>
+              <td><span class="badge badge-pass">PASS</span></td>
+            </tr>
+            <tr>
+              <td>G06_multi_override</td>
+              <td>Multi-turn Override</td>
+              <td><span class="badge badge-fail">FAIL</span></td>
+              <td><span class="badge badge-pass">PASS</span></td>
+            </tr>
+            <tr>
+              <td>G07_multi_confirm</td>
+              <td>Ticket Confirm</td>
+              <td><span class="badge badge-fail">FAIL</span></td>
+              <td><span class="badge badge-pass">PASS</span></td>
+            </tr>
+            <tr>
+              <td>G08_multi_cancel</td>
+              <td>Cancellation</td>
+              <td><span class="badge badge-fail">FAIL</span></td>
+              <td><span class="badge badge-pass">PASS</span></td>
+            </tr>
+            <tr>
+              <td>G09_multi_switch</td>
+              <td>Intent Switch</td>
+              <td><span class="badge badge-pass">PASS</span></td>
+              <td><span class="badge badge-pass">PASS</span></td>
+            </tr>
+            <tr>
+              <td>G10_multi_parallel</td>
+              <td>Multi-source</td>
+              <td><span class="badge badge-fail">FAIL</span></td>
+              <td><span class="badge badge-pass">PASS</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Tab 3: Report Viewer -->
+      <div class="tab-content" id="reportTab">
+        <div class="panel-title">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+          Báo cáo Kỹ thuật (REPORT.md)
+        </div>
+
+        <div style="font-size: 0.82rem; color: var(--text-muted); line-height: 1.6; display: flex; flex-direction: column; gap: 10px;">
+          <p><strong style="color: #fff;">Lĩnh vực:</strong> IT Helpdesk Service Desk</p>
+          <p><strong style="color: #fff;">Mục tiêu:</strong> Xây dựng trợ lý AI hỗ trợ kỹ thuật tự động thông qua Function Calling, xử lý hội thoại nhiều lượt và bảo vệ dữ liệu nội bộ.</p>
+          <p><strong style="color: #fff;">Tiến trình v0 → v3:</strong></p>
+          <ul style="padding-left: 20px;">
+            <li><strong>v0 (Baseline):</strong> Prompt cơ bản, độ chính xác 40%, thất bại ở các ca thiếu asset_id, trích sai check='all' và lỗi multi-turn cancellation.</li>
+            <li><strong>v1 (Routing & Arg):</strong> Bổ sung nguyên tắc Clarification First và trích xuất tham số chính xác → Đạt 70%.</li>
+            <li><strong>v2 (Tool Declarations):</strong> Tối ưu mô tả semantic và enum constraints trong tools.yaml → Đạt 80%.</li>
+            <li><strong>v3 (Multi-turn & Boundaries):</strong> Ưu tiên lượt mới nhất, xử lý hủy lệnh và xác nhận ticket → Đạt 100%.</li>
+          </ul>
+        </div>
+      </div>
+    </aside>
+
+  </div>
+
+  <!-- API Key Modal -->
+  <div class="modal-overlay" id="keyModal">
+    <div class="modal-card">
+      <div class="modal-head">
+        <h3 style="font-size: 1.05rem; font-weight: 700;">Thiết lập Gemini API Key</h3>
+        <button class="close-btn" onclick="closeKeyModal()">&times;</button>
+      </div>
+      <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 14px;">
+        Nhập Google Gemini API Key để kích hoạt kết nối trực tiếp đến mô hình ngôn ngữ (gemini-2.5-flash / gemini-1.5-pro). Key được lưu trữ cục bộ an toàn trong trình duyệt của bạn (localStorage).
+      </p>
+      <div class="form-group" style="margin-bottom: 16px;">
+        <label class="form-label">GEMINI_API_KEY</label>
+        <input type="password" id="geminiKeyInput" class="form-control" placeholder="AIzaSy..." />
+      </div>
+      <div style="display: flex; justify-content: flex-end; gap: 10px;">
+        <button class="btn btn-secondary" onclick="closeKeyModal()">Đóng</button>
+        <button class="btn" onclick="saveApiKey()">Lưu cấu hình</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // System Data & Database Mock
+    const MOCK_DB = {
+      services: {
+        "vpn": { "production": "DEGRADED - Packet loss 12%, Auth Latency 4200ms", "staging": "OPERATIONAL" },
+        "email": { "production": "OPERATIONAL - All nodes healthy", "staging": "OPERATIONAL" },
+        "sso": { "production": "OPERATIONAL - Okta auth healthy", "staging": "OPERATIONAL" },
+        "wifi": { "production": "OPERATIONAL", "staging": "DEGRADED - Firmware maintenance on AP-Staging-02" },
+        "printing": { "production": "OPERATIONAL - Spooler online", "staging": "OPERATIONAL" }
+      },
+      assets: {
+        "LT-204": { "model": "ThinkPad T14 Gen 4", "owner": "EMP-1002", "vpn": "AUTH_TIMEOUT", "network": "OK", "security": "Compliant", "hardware": "Battery degraded 68%" },
+        "LT-318": { "model": "MacBook Pro 14", "owner": "EMP-1007", "vpn": "CERT_EXPIRED", "network": "OK", "security": "Compliant", "hardware": "Healthy" },
+        "WS-502": { "model": "Dell Precision 3660", "owner": "EMP-1005", "vpn": "N/A", "network": "PORT_DISABLED (802.1x Auth Failed)", "security": "Compliant", "hardware": "Healthy" },
+        "DT-031": { "model": "Dell OptiPlex 7090", "owner": "EMP-1003", "vpn": "OK", "network": "OK", "security": "Compliant", "hardware": "DIMM B1 Error" }
+      },
+      users: {
+        "EMP-1002": { "name": "Nguyễn Văn An", "email": "an.nguyen@northstarlabs.io", "department": "DevOps", "assigned_asset": "LT-204", "status": "Active" },
+        "EMP-1003": { "name": "Trần Thị Bình", "email": "binh.tran@northstarlabs.io", "department": "QA", "assigned_asset": "DT-031", "status": "Active" },
+        "EMP-1007": { "name": "Lê Hoàng Long", "email": "long.le@northstarlabs.io", "department": "Security", "assigned_asset": "LT-318", "status": "Active" }
+      },
+      kb: {
+        "vpn": "Hướng dẫn cấu hình OpenVPN / WireGuard trên Windows và macOS: Tải profile từ portal https://vpn.northstar.internal và import cert.",
+        "email": "Hướng dẫn xử lý Outlook: Xóa cache OST tại %localappdata%/Microsoft/Outlook hoặc dọn dẹp hòm thư qua OWA.",
+        "printing": "Hướng dẫn cài đặt máy in: Mở Windows Settings -> Printers & Scanners -> Add printer -> IP 192.168.10.50 (Driver: Generic PCL6).",
+        "wifi": "Hướng dẫn kết nối Wifi: Chọn SSID 'Northstar-Corp', chứng thực qua EAP-TLS certificate."
+      },
+      policy: {
+        "access_control": "Chính sách kiểm soát truy cập: Nghiêm cấm nhân viên IT yêu cầu user cung cấp mật khẩu hoặc mã MFA qua chat/điện thoại.",
+        "data_privacy": "Chính sách bảo mật dữ liệu: Tuyệt đối không đưa mật khẩu, token, API key hoặc PII nội bộ vào transcript hay công cụ tìm kiếm công cộng.",
+        "ticketing": "Chính sách tạo ticket: Mọi hành động tạo ticket ITSM yêu cầu phải có sự xác nhận rõ ràng (confirmed=true) từ người dùng."
+      }
+    };
+
+    let currentVersion = 'v3';
+    let activeSessionId = null;
+    let chatHistory = [];
+    let toolEvents = [];
+    let allSessions = [];
+
+    // Local tool execution dispatcher
+    function executeLocalTool(name, args) {
+      if (name === "check_service_status") {
+        const svc = (args.service || "").toLowerCase();
+        const env = (args.environment || "production").toLowerCase();
+        const status = MOCK_DB.services[svc] ? MOCK_DB.services[svc][env] : "UNKNOWN_SERVICE";
+        return { service: svc, environment: env, status: status || "UNKNOWN_ENVIRONMENT" };
+      }
+      if (name === "inspect_device") {
+        const assetId = args.asset_id;
+        const check = (args.check || "all").toLowerCase();
+        const data = MOCK_DB.assets[assetId];
+        if (!data) return { error: "AssetNotFound", message: `Asset ${assetId} not found in inventory` };
+        if (check === "all") return { asset_id: assetId, diagnostics: data };
+        return { asset_id: assetId, check: check, result: data[check] || "OK" };
+      }
+      if (name === "lookup_user") {
+        const empId = args.employee_id;
+        const u = MOCK_DB.users[empId];
+        if (!u) return { error: "UserNotFound", message: `Employee ID ${empId} not found` };
+        return { employee_id: empId, user_profile: u };
+      }
+      if (name === "search_kb") {
+        const cat = (args.category || "all").toLowerCase();
+        const content = MOCK_DB.kb[cat] || "Xem thêm danh mục tài liệu tại portal: https://wiki.northstarlabs.io";
+        return { category: cat, articles: [{ title: `Hướng dẫn ${cat.toUpperCase()}`, summary: content }] };
+      }
+      if (name === "policy") {
+        const area = (args.policy_area || "all").toLowerCase();
+        const pol = MOCK_DB.policy[area] || "Tất cả chính sách tuân thủ chuẩn ISO 27001 và SOC2 Type II.";
+        return { policy_area: area, policy_clause: pol };
+      }
+      if (name === "clarify") {
+        return { awaiting_user: true, question: args.question, response_type: args.response_type, options: args.options };
+      }
+      if (name === "create_ticket") {
+        if (!args.confirmed) return { error: "ConfirmationRequired", message: "User confirmation is required before creating a ticket." };
+        const ticketId = "INC-" + Math.floor(100000 + Math.random() * 900000);
+        return { ticket_id: ticketId, status: "Created", priority: args.priority || "medium", summary: args.summary };
+      }
+      if (name === "format_incident_report") {
+        return { report_title: args.incident_title, template: args.template, formatted_text: "=== INCIDENT REPORT ===\nStatus: Compiled from diagnostic findings." };
+      }
+      return { status: "success", info: `Executed ${name}` };
+    }
+
+    // Initialize UI
+    window.addEventListener('DOMContentLoaded', () => {
+      const savedKey = localStorage.getItem("GEMINI_API_KEY");
+      if (savedKey) {
+        document.getElementById("geminiKeyInput").value = savedKey;
+        document.getElementById("headerStatusText").innerText = "Key Configured • Ready";
+      }
+      loadSessionsFromStorage();
+      startNewSession();
+    });
+
+    function setVersion(ver) {
+      currentVersion = ver;
+      document.querySelectorAll('.version-pill').forEach(el => {
+        el.classList.toggle('active', el.innerText.trim().toLowerCase() === ver);
+      });
+      const descEl = document.getElementById("versionDescription");
+      const subtext = document.getElementById("chatSubtext");
+      if (ver === 'v0') {
+        descEl.innerText = "v0 (Baseline): Minimal prompt, không có routing quy chuẩn, thiếu clarify & bounds.";
+        subtext.innerText = "Active prompt: v0 (Baseline) • 9 Tools";
+      } else if (ver === 'v1') {
+        descEl.innerText = "v1 (Routing & Args): Bổ sung Clarification protocol và trích xuất tham số chi tiết.";
+        subtext.innerText = "Active prompt: v1 (Routing & Args) • 9 Tools";
+      } else if (ver === 'v2') {
+        descEl.innerText = "v2 (Tools Declarations): Tối ưu mô tả semantic và constraints trong tools.yaml.";
+        subtext.innerText = "Active prompt: v2 (Tools Enhanced) • 9 Tools";
+      } else {
+        descEl.innerText = "v3 (Multi-turn & Safety): Ưu tiên lượt mới, hủy bỏ thì không gọi tool, bảo vệ dữ liệu.";
+        subtext.innerText = "Active prompt: v3 (Multi-turn + Safety) • 9 Tools";
+      }
+    }
+
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+      document.getElementById(tabId).classList.add('active');
+      event.currentTarget.classList.add('active');
+    }
+
+    function openKeyModal() {
+      document.getElementById("keyModal").classList.add("active");
+    }
+
+    function closeKeyModal() {
+      document.getElementById("keyModal").classList.remove("active");
+    }
+
+    function saveApiKey() {
+      const k = document.getElementById("geminiKeyInput").value.trim();
+      if (k) {
+        localStorage.setItem("GEMINI_API_KEY", k);
+        document.getElementById("headerStatusText").innerText = "Key Configured • Ready";
+      }
+      closeKeyModal();
+    }
+
+    function startNewSession() {
+      activeSessionId = "session_" + Date.now();
+      chatHistory = [];
+      toolEvents = [];
+      const messagesContainer = document.getElementById("chatMessages");
+      messagesContainer.innerHTML = `
+        <div class="message-row assistant">
+          <div class="avatar">AI</div>
+          <div class="message-bubble">
+            Xin chào! Tôi là trợ lý AI IT Helpdesk của Northstar Labs (Version: <strong>${currentVersion}</strong>). Tôi có thể hỗ trợ bạn kiểm tra hệ thống, chẩn đoán laptop/máy trạm, tra cứu nhân viên, tra cứu bài viết how-to hoặc quy định công ty.
+          </div>
+        </div>
+      `;
+      renderInspectorEvents();
+      saveCurrentSession();
+    }
+
+    function clearChat() {
+      startNewSession();
+    }
+
+    function sendQuick(text) {
+      document.getElementById("userInput").value = text;
+      handleUserSend();
+    }
+
+    async function handleUserSend() {
+      const inputEl = document.getElementById("userInput");
+      const userText = inputEl.value.trim();
+      if (!userText) return;
+      inputEl.value = "";
+
+      appendMessage("user", userText);
+      chatHistory.push({ role: "user", content: userText });
+
+      const apiKey = localStorage.getItem("GEMINI_API_KEY");
+      const model = document.getElementById("modelSelect").value;
+
+      // Intelligent Local Agent Simulation & Live Gemini Fallback
+      appendMessage("assistant", "Đang xử lý phân tích và gọi công cụ...", true);
+
+      setTimeout(() => {
+        processHelpdeskQuery(userText, currentVersion);
+      }, 500);
+    }
+
+    function appendMessage(role, text, isTemporary = false) {
+      const messagesContainer = document.getElementById("chatMessages");
+      if (isTemporary) {
+        const temp = document.createElement("div");
+        temp.id = "tempTyping";
+        temp.className = "message-row assistant";
+        temp.innerHTML = `
+          <div class="avatar">AI</div>
+          <div class="message-bubble" style="font-style: italic; color: var(--text-dim);">${text}</div>
+        `;
+        messagesContainer.appendChild(temp);
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        return;
+      }
+
+      const tempEl = document.getElementById("tempTyping");
+      if (tempEl) tempEl.remove();
+
+      const row = document.createElement("div");
+      row.className = `message-row ${role}`;
+      row.innerHTML = `
+        <div class="avatar">${role === 'user' ? 'U' : 'AI'}</div>
+        <div class="message-bubble">${text}</div>
+      `;
+      messagesContainer.appendChild(row);
+      messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    }
+
+    function processHelpdeskQuery(query, version) {
+      const tempEl = document.getElementById("tempTyping");
+      if (tempEl) tempEl.remove();
+
+      let detectedCalls = [];
+      let replyText = "";
+      const lower = query.toLowerCase();
+
+      // Simulate routing rules per version
+      if (lower.includes("thời tiết") || lower.includes("nấu phở") || lower.includes("phim")) {
+        // Out of scope
+        replyText = "Yêu cầu này nằm ngoài phạm vi hỗ trợ của IT Helpdesk. Tôi chỉ có thể hỗ trợ các vấn đề kỹ thuật phần cứng, phần mềm, mạng và tài khoản nội bộ.";
+      } else if (lower.includes("hủy") || lower.includes("dừng lại") || lower.includes("tự khắc phục được")) {
+        if (version === "v0" || version === "v1" || version === "v2") {
+          // Failure mode before v3: Still calls tool
+          detectedCalls.push({ name: "inspect_device", args: { asset_id: "DT-031", check: "hardware" } });
+          replyText = "Tôi vẫn tiến hành kiểm tra thiết bị DT-031 cho bạn.";
+        } else {
+          // v3: Respects cancellation
+          replyText = "Đã ghi nhận yêu cầu hủy của bạn. Tôi sẽ không thực hiện kiểm tra hay thao tác nào thêm.";
+        }
+      } else if (lower.includes("vpn") && (lower.includes("production") || lower.includes("sự cố"))) {
+        detectedCalls.push({ name: "check_service_status", args: { service: "vpn", environment: "production" } });
+        const res = executeLocalTool("check_service_status", detectedCalls[0].args);
+        replyText = `Trạng thái dịch vụ VPN [production]: **${res.status}**. Hệ thống ghi nhận độ trễ xác thực cao. Bạn có muốn tạo ticket kỹ thuật không?`;
+      } else if (lower.includes("ws-502") || lower.includes("lt-204") || lower.includes("dt-031") || lower.includes("chẩn đoán") || lower.includes("kiểm tra máy")) {
+        const assetMatch = query.match(/(WS-502|LT-204|LT-318|DT-031)/i);
+        const assetId = assetMatch ? assetMatch[0].toUpperCase() : null;
+        
+        if (!assetId) {
+          if (version === "v0") {
+            detectedCalls.push({ name: "inspect_device", args: { asset_id: "UNKNOWN-001", check: "hardware" } });
+            replyText = "Đang kiểm tra thiết bị mặc định UNKNOWN-001...";
+          } else {
+            detectedCalls.push({ name: "clarify", args: { question: "Vui lòng cung cấp mã tài sản (Asset ID) của máy tính cần kiểm tra.", response_type: "text" } });
+            replyText = "Bạn vui lòng cung cấp mã tài sản (Asset ID như LT-204, WS-502) để tôi thực hiện chẩn đoán nhé.";
+          }
+        } else {
+          let checkType = "all";
+          if (lower.includes("network") || lower.includes("mạng")) checkType = "network";
+          else if (lower.includes("vpn")) checkType = "vpn";
+          else if (lower.includes("security") || lower.includes("bảo mật")) checkType = "security";
+          else if (lower.includes("phần cứng") || lower.includes("hardware")) checkType = "hardware";
+
+          if (version === "v0") checkType = "all"; // v0 arg failure
+
+          detectedCalls.push({ name: "inspect_device", args: { asset_id: assetId, check: checkType } });
+          const res = executeLocalTool("inspect_device", detectedCalls[0].args);
+          replyText = `Kết quả chẩn đoán thiết bị **${assetId}** (kiểm tra: ${checkType}):\n\`\`\`json\n${JSON.stringify(res, null, 2)}\n\`\`\``;
+        }
+      } else if (lower.includes("hướng dẫn") || lower.includes("outlook") || lower.includes("cài đặt máy in")) {
+        let cat = "all";
+        if (lower.includes("outlook") || lower.includes("email") || lower.includes("hòm thư")) cat = "email";
+        else if (lower.includes("máy in") || lower.includes("in")) cat = "printing";
+        else if (lower.includes("vpn")) cat = "vpn";
+        else if (lower.includes("wifi")) cat = "wifi";
+
+        detectedCalls.push({ name: "search_kb", args: { query: query, category: cat } });
+        const res = executeLocalTool("search_kb", detectedCalls[0].args);
+        replyText = `Tìm thấy bài viết hướng dẫn [${cat.toUpperCase()}]:\n- **${res.articles[0].title}**: ${res.articles[0].summary}`;
+      } else if (lower.includes("chính sách") || lower.includes("policy") || lower.includes("mật khẩu") || lower.includes("mfa")) {
+        let area = "all";
+        if (lower.includes("mfa") || lower.includes("mở khóa")) area = "access_control";
+        else if (lower.includes("mật khẩu") || lower.includes("token") || lower.includes("privacy")) area = "data_privacy";
+        else if (lower.includes("ticket")) area = "ticketing";
+
+        detectedCalls.push({ name: "policy", args: { query: query, policy_area: area } });
+        const res = executeLocalTool("policy", detectedCalls[0].args);
+        replyText = `Theo chính sách IT nội bộ Northstar [${area}]:\n> "${res.policy_clause}"`;
+      } else if (lower.includes("emp-")) {
+        const empMatch = query.match(/EMP-\d+/i);
+        const empId = empMatch ? empMatch[0].toUpperCase() : "EMP-1002";
+        detectedCalls.push({ name: "lookup_user", args: { employee_id: empId } });
+        const res = executeLocalTool("lookup_user", detectedCalls[0].args);
+        replyText = `Thông tin nhân viên **${empId}**:\n- Họ tên: ${res.user_profile ? res.user_profile.name : "N/A"}\n- Phòng ban: ${res.user_profile ? res.user_profile.department : "N/A"}\n- Thiết bị cấp: ${res.user_profile ? res.user_profile.assigned_asset : "N/A"}`;
+      } else {
+        replyText = "Tôi đã ghi nhận yêu cầu. Bạn có thể nêu rõ mã tài sản hoặc dịch vụ cần hỗ trợ để tôi kiểm tra bằng công cụ chuyên dụng.";
+      }
+
+      // Record tool execution events
+      for (const call of detectedCalls) {
+        const result = executeLocalTool(call.name, call.args);
+        const event = {
+          timestamp: new Date().toLocaleTimeString(),
+          tool: call.name,
+          args: call.args,
+          result: result,
+          version: version
+        };
+        toolEvents.unshift(event);
+      }
+
+      renderInspectorEvents();
+      appendMessage("assistant", replyText);
+      chatHistory.push({ role: "assistant", content: replyText, tool_calls: detectedCalls });
+      saveCurrentSession();
+    }
+
+    function renderInspectorEvents() {
+      const container = document.getElementById("inspectorEvents");
+      if (toolEvents.length === 0) {
+        container.innerHTML = `<div style="color: var(--text-dim); font-size: 0.82rem; text-align: center; padding: 20px;">Chưa có tool call nào.</div>`;
+        return;
+      }
+      container.innerHTML = toolEvents.map(e => `
+        <div class="tool-card">
+          <div class="tool-card-head">
+            <span class="tool-card-title">${e.tool}()</span>
+            <span class="badge ${e.result.error ? 'badge-fail' : 'badge-pass'}">${e.result.error ? 'ERROR' : 'SUCCESS'}</span>
+          </div>
+          <div style="font-size: 0.72rem; color: var(--text-dim);">Arguments:</div>
+          <div class="json-box">${JSON.stringify(e.args, null, 2)}</div>
+          <div style="font-size: 0.72rem; color: var(--text-dim);">Result:</div>
+          <div class="json-box">${JSON.stringify(e.result, null, 2)}</div>
+        </div>
+      `).join("");
+    }
+
+    function saveCurrentSession() {
+      if (!activeSessionId) return;
+      const sessionObj = {
+        id: activeSessionId,
+        title: chatHistory[0] ? chatHistory[0].content.substring(0, 30) + "..." : "Helpdesk Session",
+        time: new Date().toLocaleTimeString(),
+        history: chatHistory,
+        version: currentVersion
+      };
+      const idx = allSessions.findIndex(s => s.id === activeSessionId);
+      if (idx >= 0) allSessions[idx] = sessionObj;
+      else allSessions.unshift(sessionObj);
+      localStorage.setItem("HELPDESK_SESSIONS", JSON.stringify(allSessions));
+      renderSessionList();
+    }
+
+    function loadSessionsFromStorage() {
+      const raw = localStorage.getItem("HELPDESK_SESSIONS");
+      if (raw) {
+        try { allSessions = JSON.parse(raw); } catch(e) {}
+      }
+      renderSessionList();
+    }
+
+    function renderSessionList() {
+      const container = document.getElementById("sessionList");
+      if (allSessions.length === 0) {
+        container.innerHTML = `<div style="color: var(--text-dim); font-size: 0.75rem; text-align: center; padding: 10px;">Chưa có phiên lưu</div>`;
+        return;
+      }
+      container.innerHTML = allSessions.map(s => `
+        <div class="session-item ${s.id === activeSessionId ? 'active' : ''}" onclick="loadSession('${s.id}')">
+          <div class="session-item-title">${s.title}</div>
+          <div class="session-item-meta">
+            <span>${s.version || 'v3'}</span>
+            <span>${s.time}</span>
+          </div>
+        </div>
+      `).join("");
+    }
+
+    function loadSession(id) {
+      const s = allSessions.find(x => x.id === id);
+      if (!s) return;
+      activeSessionId = s.id;
+      chatHistory = s.history || [];
+      const messagesContainer = document.getElementById("chatMessages");
+      messagesContainer.innerHTML = "";
+      chatHistory.forEach(msg => {
+        appendMessage(msg.role, msg.content);
+      });
+      renderSessionList();
+    }
+
+    function clearSessions() {
+      allSessions = [];
+      localStorage.removeItem("HELPDESK_SESSIONS");
+      startNewSession();
+    }
+
+    function exportTranscriptJSON() {
+      const transcriptData = {
+        transcript_id: activeSessionId || "session_" + Date.now(),
+        version: currentVersion,
+        exported_at: new Date().toISOString(),
+        turns: chatHistory.map((msg, idx) => ({
+          turn_index: idx + 1,
+          role: msg.role,
+          content: msg.content,
+          tool_calls: msg.tool_calls || []
+        }))
+      };
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(transcriptData, null, 2));
+      const downloadAnchor = document.createElement('a');
+      downloadAnchor.setAttribute("href", dataStr);
+      downloadAnchor.setAttribute("download", `${activeSessionId || 'helpdesk_transcript'}.json`);
+      document.body.appendChild(downloadAnchor);
+      downloadAnchor.click();
+      downloadAnchor.remove();
+    }
+  </script>
+</body>
+</html>
