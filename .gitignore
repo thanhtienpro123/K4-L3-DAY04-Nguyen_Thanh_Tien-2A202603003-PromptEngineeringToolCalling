@@ -1,0 +1,31 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.venv/
+
+# Secrets — never commit real keys
+.env
+.env.*
+!.env.example
+
+# Instructor materials do not belong in a learner repository
+INTERNAL-DEMO-SCRIPT.md
+INSTRUCTOR-GUIDE.md
+starter/
+/slides/
+/quiz/
+/coach-materials/
+COACH-MATERIALS.md
+
+# Local action output. Commit reviewed runs and transcripts as submission evidence.
+/starter_v0/tickets/
+node_modules/
+dist/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
